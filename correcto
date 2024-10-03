@@ -138,7 +138,7 @@ IPC0bits.T1IP=4; // Prioridad intermedia
 T1CON|=(1<<15); // Comienza a contar
 }
 
-// MAIN.C del ejercicio anterior 4.1 pero utilizando función
+// MAIN.C del ejercicio anterior (el uno de esta práctica) pero utilizando función
 
 #include <p33FJ32MC202.h>
 #include "config.h"
@@ -218,6 +218,67 @@ ticks2=0;
 }
 
 }
+
+
+// HAY FOTOS
+
+//Ejercicio 3, en el MAIN.C
+
+
+#include <p33FJ32MC202.h>
+#include "config.h"
+#include "timer.h"
+
+// -----------------------------------------------------------------------------
+
+
+static int ticks=0;
+static int periodo_enc=0;
+
+int main (void){
+    inicializarReloj();
+//inicializamos salidas
+TRISB&=~(1<<13);
+PORTB|=(1<<13); //led incialmente apgado
+
+//inicializamos timer
+inicializarTimer(10);
+while(1){
+
+if(ticks<periodo_enc){
+PORTB&= ~(1<<13);
+}
+else{
+PORTB|=(1<<13);
+}
+}
+return 0;
+}
+
+
+void __attribute__((interrupt,no_auto_psv))
+_T1Interrupt(void){
+static int miliseg=0;
+IFS0bits.T1IF=0; // bandera a 0
+miliseg++;
+
+if(miliseg>=1000){
+miliseg=0;
+periodo_enc=periodo_enc+2;
+}
+
+ticks++;
+if(ticks>9){
+ticks=0;}
+
+if(periodo_enc>10){
+periodo_enc=0;
+}
+
+}
+
+//Ejercicio 4
+
 
 
 
