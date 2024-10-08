@@ -414,14 +414,14 @@ void dcPWM(unsigned int dms);
 # include "config.h"
 
 static int periodo;
-static int tiempo_apagado;
+static int tiempo_nivelalto;
 
 void periodoPWM(unsigned int dms){
 periodo=dms;
 }
 
 void dcPWM (unsigned int dms){
-tiempo_apagado=dms;
+tiempo_nivelalto=dms;
 }
 void inicializarPWM(void){
 T2CON=0x0000;
@@ -437,7 +437,7 @@ void __attribute__((interrupt,no_auto_psv))
 _T2Interrupt(void){
 static int ticks=0;
 IFS0bits.T2IF=0;
-if(ticks<tiempo_apagado){
+if(ticks<tiempo_nivelalto){
 PORTB|=(1<<12);
 }
 else{
