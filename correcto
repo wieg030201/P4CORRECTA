@@ -277,6 +277,122 @@ periodo_enc=0;
 
 }
 
+//MOVIENDO LA FUNCION INTERRUPCION A TIMER.C
+
+//TIMER.H
+#ifndef _TIMER_H
+#define _TIMER_H
+
+void inicializarTimer(unsigned int ms);
+        int getTicks(void);
+        int getPeriodo(void);
+
+#endif
+// TIMER.C
+#include <p33FJ32MC202.h>
+#include "config.h"
+
+static int periodo_enc;
+static int ticks;
+ static int miliseg;
+void inicializarTimer (unsigned int dms){
+
+if( dms<=16){
+T1CON=0x0000;
+PR1=dms*(FCY/10000);
+}
+
+else if(dms<=132){
+T1CON=0x0010;
+PR1=dms*(FCY/80000);
+}
+
+else if (dms<=1058){
+T1CON=0x0020;
+PR1=dms*(FCY/640000);
+}
+
+else if(dms<=4235){
+T1CON=0x0030;
+PR1=dms*(FCY/2560000);
+}
+else {
+dms=4235;
+T1CON=0x0030;
+PR1=dms*(FCY/2560000);
+}
+
+TMR1=0;
+IFS0bits.T1IF=0; // bandera a 0
+IEC0bits.T1IE=1; //Habilitamos interrupción
+IPC0bits.T1IP=4; // Prioridad intermedia
+T1CON|=(1<<15); // Comienza a contar
+}
+void __attribute__((interrupt, no_auto_psv))
+_T1Interrupt(void) {
+   
+    IFS0bits.T1IF = 0; // bandera a 0
+    miliseg++;
+
+    if (miliseg >= 1000) {
+        miliseg = 0;
+        periodo_enc = periodo_enc + 2;
+    }
+
+    ticks++;
+    if (ticks > 9) {
+        ticks = 0;
+    }
+
+    if (periodo_enc > 10) {
+        periodo_enc = 0;
+    }
+
+
+}
+
+int getTicks(void){
+    return ticks;
+}
+int getPeriodo(void){
+    return periodo_enc;
+}
+//MAIN.C
+// -----------------------------------------------------------------------------
+
+#include <p33FJ32MC202.h>
+#include "config.h"
+#include "timer.h"
+
+// -----------------------------------------------------------------------------
+
+
+static int ticks=0;
+static int periodo_enc=0;
+static int miliseg=0;
+
+int main(void) {
+    inicializarReloj();
+    //inicializamos salidas
+    TRISB &= ~(1 << 13);
+    PORTB |= (1 << 13); //led incialmente apgado
+
+    //inicializamos timer
+    inicializarTimer(10);
+    
+    while (1) {
+        ticks= getTicks();
+        periodo_enc = getPeriodo();
+        if (ticks < periodo_enc) {
+            PORTB &= ~(1 << 13);
+        } else {
+            PORTB |= (1 << 13);
+        }
+    }
+    return 0;
+}
+
+
 //Ejercicio 4
 
 
