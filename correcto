@@ -437,7 +437,7 @@ void __attribute__((interrupt,no_auto_psv))
 _T2Interrupt(void){
 static int ticks=0;
 IFS0bits.T2IF=0;
-if(ticks<tiempo_nivelalto){
+if(ticks<tiempo_nivelalto){    // estoy en nivel alto
 PORTB|=(1<<12);
 }
 else{
@@ -465,7 +465,7 @@ TRISB&=~(1<<12);
 PORTB|=(1<<12);
 
 periodoPWM(10000);
-dcPWM(7500);
+dcPWM(2500);
 inicializarPWM();
 while(1){
 
